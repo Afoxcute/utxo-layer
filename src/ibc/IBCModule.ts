@@ -165,25 +165,15 @@ export class IBCModule {
      * Calculate conversion from source cryptocurrency to ZBTC
      */
     private calculateConversion(amount: BN, sourceDenom: CryptoCurrency): BN {
-        // In a real implementation, this would use oracle prices or predefined rates
-        // For this example, we use a simplified approach:
-
-        let conversionRate = new BN(1); // 1:1 for BTC
+        // Use the same fee structure regardless of the input cryptocurrency
+        // This matches the existing Bitcoin-to-zBTC bridge behavior
 
         switch (sourceDenom) {
             case CryptoCurrency.DOGE:
-                // Example: 1 DOGE = 0.00001 BTC (simplified)
-                conversionRate = new BN(10000); // Division factor
-                return amount.div(conversionRate);
-
             case CryptoCurrency.LTC:
-                // Example: 1 LTC = 0.004 BTC (simplified)
-                conversionRate = new BN(250); // Division factor
-                return amount.div(conversionRate);
-
             case CryptoCurrency.BTC:
             default:
-                // 1:1 for BTC
+                // 1:1 conversion with no divisor
                 return amount;
         }
     }

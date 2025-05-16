@@ -109,18 +109,18 @@ export const getDepositDetailsTableItems = (
       },
       value: selectedTransaction.deposit_block
         ? {
-            label: selectedTransaction.interaction_id,
-            rightIcon: "NewWindow",
-            link: getFullZeusScanUrl(
-              selectedTransaction.interaction_id,
-              ZEUS_SCAN_URL,
-              solanaNetwork,
-              bitcoinNetwork
-            ),
-          }
+          label: selectedTransaction.interaction_id,
+          rightIcon: "NewWindow",
+          link: getFullZeusScanUrl(
+            selectedTransaction.interaction_id,
+            ZEUS_SCAN_URL,
+            solanaNetwork,
+            bitcoinNetwork
+          ),
+        }
         : {
-            label: "Processing",
-          },
+          label: "Processing",
+        },
     },
     {
       label: {
@@ -158,19 +158,19 @@ export const getDepositDetailsTableItems = (
       },
       value: {
         label: `${Number(selectedTransaction.miner_fee) > 0
-            ? formatValue(
-                new BigNumber(selectedTransaction.miner_fee).dividedBy(
-                  10 ** BTC_DECIMALS
-                ),
-                6
-              )
-            : formatValue(
-                new BigNumber(
-                  getEstimatedDepositTransactionFee(feeRate ?? 1)
-                ).dividedBy(10 ** BTC_DECIMALS),
-                6
-              )
-        } BTC`,
+          ? formatValue(
+            new BigNumber(selectedTransaction.miner_fee).dividedBy(
+              10 ** BTC_DECIMALS
+            ),
+            6
+          )
+          : formatValue(
+            new BigNumber(
+              getEstimatedDepositTransactionFee(feeRate ?? 1)
+            ).dividedBy(10 ** BTC_DECIMALS),
+            6
+          )
+          } BTC`,
         leftIcon: "btc",
       },
     },
@@ -251,8 +251,8 @@ export const getDepositStatusItems = (
       status: lockBtcCompleteAction
         ? "complete"
         : selectedTransaction?.steps?.find(
-              (step) => step.action === "AddLockToColdReserveProposal"
-            )
+          (step) => step.action === "AddLockToColdReserveProposal"
+        )
           ? "pending"
           : "not-started",
       label: "Lock BTC",
@@ -266,10 +266,10 @@ export const getDepositStatusItems = (
       status: interactionCompleteAction
         ? "complete"
         : selectedTransaction?.steps?.find(
-              (step) =>
-                step.chain === Chain.Solana &&
-                step.action === "LockToColdReserve"
-            )
+          (step) =>
+            step.chain === Chain.Solana &&
+            step.action === "LockToColdReserve"
+        )
           ? "pending"
           : "not-started",
       label: "Complete",
@@ -287,11 +287,11 @@ export const getDepositAssetFrom = (
     name: "BTC",
     amount: selectedTransaction
       ? formatValue(
-          new BigNumber(selectedTransaction.amount).dividedBy(
-            10 ** BTC_DECIMALS
-          ),
-          6
-        )
+        new BigNumber(selectedTransaction.amount).dividedBy(
+          10 ** BTC_DECIMALS
+        ),
+        6
+      )
       : "-",
     isLocked: false,
   };
@@ -308,17 +308,17 @@ export const getDepositAssetTo = (
     name: assetName,
     amount: selectedTransaction
       ? formatValue(
-          new BigNumber(selectedTransaction.amount)
-            .minus(
-              new BigNumber(
-                Number(selectedTransaction.miner_fee) > 0
-                  ? selectedTransaction.miner_fee
-                  : getEstimatedDepositTransactionFee(feeRate ?? 1)
-              )
+        new BigNumber(selectedTransaction.amount)
+          .minus(
+            new BigNumber(
+              Number(selectedTransaction.miner_fee) > 0
+                ? selectedTransaction.miner_fee
+                : getEstimatedDepositTransactionFee(feeRate ?? 1)
             )
+          )
           .dividedBy(10 ** decimals),
-          6
-        )
+        6
+      )
       : "-",
     isLocked: true,
   };
@@ -473,8 +473,8 @@ export const getWithdrawalStatusItems = (
       status: unlockBtcCompleteAction
         ? "complete"
         : selectedTransaction?.steps?.find(
-              (step) => step.action === "AddUnlockToUserProposal"
-            )
+          (step) => step.action === "AddUnlockToUserProposal"
+        )
           ? "pending"
           : "not-started",
       label: "Unlock BTC",
@@ -488,9 +488,9 @@ export const getWithdrawalStatusItems = (
       status: interactionCompleteAction
         ? "complete"
         : selectedTransaction?.steps?.find(
-              (step) =>
-                step.chain === Chain.Solana && step.action === "UnlockToUser"
-            )
+          (step) =>
+            step.chain === Chain.Solana && step.action === "UnlockToUser"
+        )
           ? "pending"
           : "not-started",
       label: "Complete",
@@ -511,11 +511,11 @@ export const getWithdrawalAssetFrom = (
     name: assetName,
     amount: selectedTransaction
       ? formatValue(
-          new BigNumber(selectedTransaction.amount).dividedBy(
+        new BigNumber(selectedTransaction.amount).dividedBy(
           10 ** decimals
-          ),
-          6
-        )
+        ),
+        6
+      )
       : "-",
     isLocked: selectedTransaction ? !selectedTransaction.is_stored : true,
   };
@@ -531,12 +531,12 @@ export const getWithdrawalAssetTo = (
     name: cryptoType,
     amount: selectedTransaction
       ? formatValue(
-          new BigNumber(selectedTransaction.amount)
-            .minus(selectedTransaction.miner_fee)
-            .minus(selectedTransaction.service_fee)
+        new BigNumber(selectedTransaction.amount)
+          .minus(selectedTransaction.miner_fee)
+          .minus(selectedTransaction.service_fee)
           .dividedBy(10 ** decimals),
-          6
-        )
+        6
+      )
       : "-",
     isLocked: false,
   };

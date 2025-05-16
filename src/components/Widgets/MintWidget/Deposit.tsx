@@ -52,7 +52,8 @@ export default function Deposit({
     reactivateHotReserveBucket,
   } = useHotReserveBucketActions(bitcoinWallet);
   const { data: bitcoinUTXOs, mutate: mutateBitcoinUTXOs } = useBitcoinUTXOs(
-    bitcoinWallet?.p2tr
+    bitcoinWallet?.p2tr,
+    cryptoType
   );
 
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -152,7 +153,15 @@ export default function Deposit({
   };
 
   const getZAssetName = () => {
-    return "ZBTC";
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return "ZDOGE";
+      case CryptoCurrency.LTC:
+        return "ZLTC";
+      case CryptoCurrency.BTC:
+      default:
+        return "ZBTC";
+    }
   };
 
   const getDecimals = () => {

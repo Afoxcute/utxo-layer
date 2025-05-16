@@ -99,7 +99,7 @@ export default function MintWidget() {
           ref={widgetRef}
         >
           <div className={styles.mintWidgetHeader}>
-          <Tabs
+            <Tabs
               tabs={[
                 {
                   label: "Deposit",
@@ -113,7 +113,7 @@ export default function MintWidget() {
                 },
               ]}
               activeTab={activeTab === "deposit" ? 0 : 1}
-            onClick={handleTabClick}
+              onClick={handleTabClick}
             />
 
             <div className={styles.cryptoSelector}>

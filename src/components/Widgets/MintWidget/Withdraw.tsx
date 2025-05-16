@@ -68,13 +68,13 @@ export default function Withdraw({
     zbtcBalanceInVault?.gt(zbtcBalance)
       ? {
         label: "ZBTC",
-          type: "Custodial",
-          icon: "Lock",
-        }
+        type: "Custodial",
+        icon: "Lock",
+      }
       : {
         label: "ZBTC",
-          type: null,
-        }
+        type: null,
+      }
   );
   const [prevConnected, setPrevConnected] = useState(solanaWalletConnected);
   const [provideAmountValue, setProvideAmountValue] = useState("");
@@ -172,8 +172,15 @@ export default function Withdraw({
   };
 
   const getZAssetName = () => {
-    // Always return ZBTC regardless of input crypto type
-    return "ZBTC";
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return "ZDOGE";
+      case CryptoCurrency.LTC:
+        return "ZLTC";
+      case CryptoCurrency.BTC:
+      default:
+        return "ZBTC";
+    }
   };
 
   const getDecimals = () => {

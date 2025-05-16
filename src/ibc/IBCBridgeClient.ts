@@ -163,29 +163,39 @@ export class IBCBridgeClient {
         amount: BN,
         cryptoType: CryptoCurrency
     ): Promise<{ txId: string; packet: IBCPacket }> {
-        // 1. Create an IBC packet
+        // Use consistent fee structure for all crypto types
+        // Apply the same fees as BTC to ZBTC bridge
+
+        // Get source chain address from wallet
+        const sourceAddress = sourceWallet.p2tr;
+
+        // Create IBC packet with the crypto-specific path
         const packet = this.createIBCPacket(
-            sourceWallet.p2tr,
+            sourceAddress,
             destinationAddress.toBase58(),
             amount,
             cryptoType
         );
 
-        // 2. Sign the source chain transaction
+        // Submit the transaction to the source chain
         const sourceNetwork = this.getSourceNetwork(cryptoType);
-        const txId = await this.submitSourceChainTransaction(sourceWallet, amount, packet, sourceNetwork);
+        const txId = await this.submitSourceChainTransaction(
+            sourceWallet,
+            amount,
+            packet,
+            sourceNetwork
+        );
 
-        // 3. Create IBC light client update
+        // Update the light client to include the new block
         await this.updateLightClient(cryptoType);
 
-        // 4. Relay the IBC packet
-        await this.relayPacket(packet, txId);
+        // Relay the packet to the destination chain
+        const ack = await this.relayPacket(packet, txId);
 
-        // Return transaction ID and packet
-        return {
-            txId,
-            packet
-        };
+        // Process acknowledgement
+        await this.processAcknowledgement(ack, packet);
+
+        return { txId, packet };
     }
 
     /**
