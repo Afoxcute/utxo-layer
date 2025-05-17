@@ -13,6 +13,7 @@ const PortfolioTransactionsTabs = ({
       activeTab={activeTab}
       type="underline"
       layoutName="PortfolioTransactionsTabs"
+      className="!text-white"
       tabs={[
         {
           label: "In-Progress",

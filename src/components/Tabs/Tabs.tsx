@@ -32,7 +32,7 @@ const Tabs = ({
   return (
     <div
       className={classNames(
-        "flex flex-wrap items-center",
+        "flex flex-wrap items-center text-white",
         {
           "w-max": type === "segmented" || type === "tabs",
           "w-full flex-nowrap justify-between sm:w-max sm:flex-wrap sm:justify-start":

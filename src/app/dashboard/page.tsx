@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+import CryptoInfoCard from "@/components/CryptoInfo/CryptoInfoCard";
 import DashboardCharts from "@/components/DashboardCharts";
 import Tabs from "@/components/Tabs/Tabs";
 import useDashboardCharts from "@/hooks/hermes/useDashboardCharts";
@@ -10,10 +11,9 @@ import useDashboardStats from "@/hooks/hermes/useDashboardStats";
 import useTwoWayPegGuardianSettings from "@/hooks/hermes/useTwoWayPegGuardianSettings";
 import usePrice from "@/hooks/misc/usePrice";
 import { ChartDataPoint } from "@/types/chart";
+import { CryptoCurrency } from "@/types/misc";
 import { fillChartData } from "@/utils/chart";
 import { BTC_DECIMALS } from "@/utils/constant";
-import { CryptoCurrency } from "@/types/misc";
-import CryptoInfoCard from "@/components/CryptoInfo/CryptoInfoCard";
 
 const timelineTabs = [
   { label: "Day" },
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <span className="text-sys-color-text-primary text-2xl ">
+        <span className="text-white text-2xl ">
           <b>Dashboard</b>
         </span>
         <Tabs

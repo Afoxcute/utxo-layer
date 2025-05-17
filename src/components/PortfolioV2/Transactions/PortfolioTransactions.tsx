@@ -14,7 +14,7 @@ export default function PortfolioTransactions() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="relative flex flex-col gap-y-40 pt-8"
+      className="relative flex flex-col gap-y-40 pt-8 text-white"
     >
       <PortfolioTransactionsTabs
         activeTab={activeTab}

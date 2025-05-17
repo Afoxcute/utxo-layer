@@ -1,11 +1,12 @@
 import React from 'react';
-import { CryptoCurrency } from '@/types/misc';
+
 import Icon from '@/components/Icons';
+import { CryptoCurrency } from '@/types/misc';
 
 interface CryptoInfoCardProps {
   cryptoType: CryptoCurrency;
-  price: number;
-  change24h: number;
+  price?: number; // Mark as optional if it might not always be passed
+  change24h?: number;
 }
 
 const getCryptoIcon = (type: CryptoCurrency) => {
@@ -37,6 +38,19 @@ const CryptoInfoCard: React.FC<CryptoInfoCardProps> = ({
   price,
   change24h
 }) => {
+  const formattedPrice =
+    typeof price === 'number'
+      ? price.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+      : '0.00';
+
+  const formattedChange =
+    typeof change24h === 'number'
+      ? `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`
+      : '0.00%';
+
   return (
     <div className="crypto-info-card">
       <div className="crypto-info-card__header">
@@ -50,13 +64,10 @@ const CryptoInfoCard: React.FC<CryptoInfoCardProps> = ({
       </div>
       <div className="crypto-info-card__stats">
         <div className="crypto-info-card__price">
-          ${price.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
+          ${formattedPrice}
         </div>
-        <div className={`crypto-info-card__change ${change24h >= 0 ? 'positive' : 'negative'}`}>
-          {change24h >= 0 ? '+' : ''}{change24h.toFixed(2)}%
+        <div className={`crypto-info-card__change ${change24h && change24h >= 0 ? 'positive' : 'negative'}`}>
+          {formattedChange}
         </div>
       </div>
       <style jsx>{`
@@ -67,13 +78,11 @@ const CryptoInfoCard: React.FC<CryptoInfoCardProps> = ({
           margin-bottom: 16px;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        
         .crypto-info-card__header {
           display: flex;
           align-items: center;
           margin-bottom: 12px;
         }
-        
         .crypto-info-card__icon {
           margin-right: 12px;
           display: flex;
@@ -84,43 +93,36 @@ const CryptoInfoCard: React.FC<CryptoInfoCardProps> = ({
           border-radius: 50%;
           background-color: var(--sys-color-background-light);
         }
-        
         .crypto-info-card__title h3 {
           margin: 0;
           font-size: 16px;
           font-weight: 500;
           color: var(--sys-color-text-primary);
         }
-        
         .crypto-info-card__ticker {
           font-size: 12px;
           color: var(--sys-color-text-mute);
         }
-        
         .crypto-info-card__stats {
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
-        
         .crypto-info-card__price {
           font-size: 18px;
           font-weight: 600;
           color: var(--sys-color-text-primary);
         }
-        
         .crypto-info-card__change {
           padding: 4px 8px;
           border-radius: 4px;
           font-size: 14px;
           font-weight: 500;
         }
-        
         .crypto-info-card__change.positive {
           background-color: rgba(0, 200, 83, 0.1);
           color: #00c853;
         }
-        
         .crypto-info-card__change.negative {
           background-color: rgba(255, 53, 53, 0.1);
           color: #ff3535;
@@ -130,4 +132,4 @@ const CryptoInfoCard: React.FC<CryptoInfoCardProps> = ({
   );
 };
 
-export default CryptoInfoCard; 
+export default CryptoInfoCard;

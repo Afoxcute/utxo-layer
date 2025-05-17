@@ -1,4 +1,6 @@
-import { Metadata } from "next";
+// app/layout.tsx
+
+import type { Metadata } from "next";
 import { Rethink_Sans, JetBrains_Mono } from "next/font/google";
 import { Slide, ToastContainer } from "react-toastify";
 
@@ -16,17 +18,22 @@ import "./globals.scss";
 import "./design-system.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://orpheus.zeuslayer.dev"),
-  title: "Orpheus",
-  description:
-    "Orpheus: A Next.js template for Bitcoin applications built on ZeusLayer (zApps)",
-  openGraph: {
-    images: ["/graphics/metadata-img.jpg"],
-    title: "Orpheus",
+  metadataBase: new URL("https://emrys.xyz"),
+  title: "Emrys",
+  description: "Bridge seamlessly between chains",
+  themeColor: "#ffffff",
+  icons: {
+    icon: [
+      { url: "/emrys-logo1.png", sizes: "32x32", type: "image/png" },
+      { url: "/emrys-logo1.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/emrys-logo1.png",
+    shortcut: "/emrys-logo1.png",
   },
-  twitter: {
-    images: ["/graphics/metadata-img.jpg"],
-    card: "summary_large_image",
+  manifest: "/site.webmanifest",
+  other: {
+    "msapplication-TileColor": "#ffffff",
+    "mask-icon": "/safari-pinned-tab.svg",
   },
 };
 
@@ -49,22 +56,11 @@ const jetBrainsMono = JetBrains_Mono({
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className={`${rethinkSans.variable} ${jetBrainsMono.variable}`}
-    >
-      <head>
-        <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin=""
-        />
-      </head>
+    <html lang="en" className={`${rethinkSans.variable} ${jetBrainsMono.variable}`}>
       <body>
         <SolanaWalletProvider>
           <ZplClientProvider>

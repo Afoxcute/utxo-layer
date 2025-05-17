@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --bg-gradient: radial-gradient(#fafafa 0%, #d7e1fa 50%, #d7e9fa 100%);
+  --bg-gradient: #051531;
 
   --toastify-color-light: #fff;
   --toastify-color-dark: #121212;
@@ -71,7 +71,7 @@ body {
 }
 
 .page-content {
-  @apply flex flex-col space-y-6 pb-8 lg:-mt-6;
+  @apply flex flex-col space-y-6 pb-8 !text-white lg:-mt-6;
 }
 
 body {
@@ -98,7 +98,7 @@ body {
 }
 
 .page__title {
-  @apply flex w-max items-center space-x-2 rounded-[10px] bg-shade-card bg-opacity-50 px-2.5 py-1.5 text-lg font-medium text-shade-primary lg:hidden;
+  @apply flex w-max items-center space-x-2 rounded-[10px] bg-shade-card bg-opacity-50 px-2.5 py-1.5 text-lg font-medium text-white lg:hidden;
   svg {
     @apply text-primary-apollo;
   }
