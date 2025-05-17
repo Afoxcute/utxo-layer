@@ -2,7 +2,7 @@
   "name": "orpheus",
   "version": "0.1.4",
   "engines": {
-    "node": "20.18.3"
+    "node": "20"
   },
   "private": true,
   "scripts": {
