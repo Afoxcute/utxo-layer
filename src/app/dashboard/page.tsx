@@ -151,7 +151,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <span className="text-sys-color-text-primary text-2xl ">
+        <span className="text-white text-2xl ">
           <b>Dashboard</b>
         </span>
         <Tabs

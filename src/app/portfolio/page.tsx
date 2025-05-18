@@ -12,7 +12,9 @@ export default function PortfolioPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <h2>
+        <h2 style={{
+          color: 'white'
+        }}>
           <b>Overview</b>
         </h2>
       </motion.div>

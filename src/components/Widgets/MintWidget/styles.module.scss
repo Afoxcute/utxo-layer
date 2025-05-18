@@ -108,13 +108,14 @@
   cursor: pointer;
   outline: none;
   transition: border 0.2s ease-in-out;
-  
-  &:hover, &:focus {
+
+  &:hover,
+  &:focus {
     border-color: var(--sys-color-text-mute);
   }
-  
+
   option {
-    background-color: var(--sys-color-background-card);
+    background-color: #000000;
     color: var(--sys-color-text-primary);
   }
 }

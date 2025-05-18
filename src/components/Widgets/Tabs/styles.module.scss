@@ -1,9 +1,9 @@
 .tabs {
-  @apply relative flex items-center text-xl;
+  @apply relative flex items-center gap-1  text-xl;
   &__tab {
     @apply relative z-10 flex cursor-pointer items-center justify-center space-x-2 rounded-lg px-4 py-2 font-medium text-gray-500 transition ease-in-out;
     &:hover {
-      @apply text-shade-primary;
+      @apply border border-[#D631B9];
     }
     &__label {
       @apply relative z-10;
@@ -16,7 +16,7 @@
     @apply cursor-not-allowed text-shade-mute;
   }
   &__selected {
-    @apply bg-shade-selected text-primary-apollo;
+    @apply bg-[#D631B9] text-white;
   }
 }
 

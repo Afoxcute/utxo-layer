@@ -12,7 +12,9 @@ export default function PortfolioTransactionsPage() {
         animate={{ opacity: 1 }}
       >
         <b>
-          <h1>Transactions</h1>
+          <h1 style={{
+            color: 'white'
+          }}>Transactions</h1>
         </b>
       </motion.div>
       <PortfolioTransactions />

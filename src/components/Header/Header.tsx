@@ -38,14 +38,8 @@ export default function Header() {
         <div className={styles.header__container}>
           <div className={styles.header__container__start}>
             <div className={styles.header__container__start__logo}>
-              <Link href="/">
-                <Image
-                  src="/branding/logo-primary.svg"
-                  height={22}
-                  width={105}
-                  alt="Apollo Logo Primary"
-                  className="flex"
-                />
+              <Link href="/" className="flex items-center py-2 text-xl font-bold text-white">
+                <Image alt="emrys logo" src="/emrys-logo1.png" width={60} height={80} />
               </Link>
             </div>
             <div className={styles.header__container__start__nav}>
