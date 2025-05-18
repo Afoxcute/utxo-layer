@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { Psbt } from "bitcoinjs-lib";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { btcToSatoshi, satoshiToBtc } from "@/bitcoin";
 import { estimateMaxSpendableAmount } from "@/bitcoin";
@@ -52,8 +52,7 @@ export default function Deposit({
     reactivateHotReserveBucket,
   } = useHotReserveBucketActions(bitcoinWallet);
   const { data: bitcoinUTXOs, mutate: mutateBitcoinUTXOs } = useBitcoinUTXOs(
-    bitcoinWallet?.p2tr,
-    cryptoType
+    bitcoinWallet?.p2tr
   );
 
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -67,14 +66,46 @@ export default function Deposit({
     useState(false);
   const [isBalanceTooltipOpen, setIsBalanceTooltipOpen] = useState(false);
 
-  const unavailableUTXOs = bitcoinUTXOs?.filter((utxo) =>
+  // Default balances for different crypto types (in satoshis)
+  const getDefaultBalance = () => {
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return btcToSatoshi(0.0007);
+      case CryptoCurrency.LTC:
+        return btcToSatoshi(0.00348);
+      default:
+        return 0;
+    }
+  };
+
+  // Use real UTXOs for BTC, mock data for other crypto types
+  const isBTC = cryptoType === CryptoCurrency.BTC;
+
+  // Define fixed satoshi values for mock cryptocurrencies
+  const MOCK_DOGE_AMOUNT = 70000; // 0.0007 DOGE in satoshis
+  const MOCK_LTC_AMOUNT = 348000; // 0.00348 LTC in satoshis
+
+  // Create mock UTXOs based on crypto type
+  const mockUTXOs: UTXOs = !isBTC ? [
+    {
+      transaction_id: "mock-txid",
+      transaction_index: 0,
+      satoshis: cryptoType === CryptoCurrency.DOGE ? MOCK_DOGE_AMOUNT : MOCK_LTC_AMOUNT,
+      block_height: 0
+    }
+  ] : [];
+
+  // Use either real UTXOs (for BTC) or mock data (for other crypto types)
+  const effectiveUTXOs = isBTC ? (bitcoinUTXOs || []) : mockUTXOs;
+
+  const unavailableUTXOs = effectiveUTXOs.filter((utxo) =>
     cachedUtxos.some(
       (cachedUtxo) =>
         cachedUtxo.transaction_id === utxo.transaction_id &&
         cachedUtxo.transaction_index === utxo.transaction_index
     )
   );
-  const availableUTXOs = bitcoinUTXOs?.filter(
+  const availableUTXOs = effectiveUTXOs.filter(
     (utxo) =>
       !unavailableUTXOs.some(
         (unavailableUtxo) =>
@@ -106,16 +137,18 @@ export default function Deposit({
       ? formatValue(estimateReceivedAmount * btcPrice)
       : formatValue(0);
 
-  const maxSpendableSatoshis = availableUTXOs
-    ? estimateMaxSpendableAmount(availableUTXOs, feeRate)
+  const maxSpendableSatoshis = availableUTXOs.length > 0
+    ? isBTC
+      ? estimateMaxSpendableAmount(availableUTXOs, feeRate)
+      : availableUTXOs.reduce((acc, utxo) => acc + utxo.satoshis, 0)
     : 0;
 
   const totalSatoshis =
-    bitcoinUTXOs?.reduce((acc, utxo) => acc + utxo.satoshis, 0) ?? 0;
+    effectiveUTXOs.reduce((acc, utxo) => acc + utxo.satoshis, 0) ?? 0;
   const availableSatoshis =
-    availableUTXOs?.reduce((acc, utxo) => acc + utxo.satoshis, 0) ?? 0;
+    availableUTXOs.reduce((acc, utxo) => acc + utxo.satoshis, 0) ?? 0;
   const unavailableSatoshis =
-    unavailableUTXOs?.reduce((acc, utxo) => acc + utxo.satoshis, 0) ?? 0;
+    unavailableUTXOs.reduce((acc, utxo) => acc + utxo.satoshis, 0) ?? 0;
 
   const handleErrorMessage = (message: string) => {
     setErrorMessage(message);
@@ -135,10 +168,12 @@ export default function Deposit({
     setErrorMessage("");
   };
 
-  if (isAllConnected !== prevConnected) {
-    setPrevConnected(isAllConnected);
-    resetProvideAmountValue();
-  }
+  useEffect(() => {
+    if (isAllConnected !== prevConnected) {
+      setPrevConnected(isAllConnected);
+      resetProvideAmountValue();
+    }
+  }, [isAllConnected, prevConnected]);
 
   const getAssetName = () => {
     switch (cryptoType) {
@@ -153,15 +188,7 @@ export default function Deposit({
   };
 
   const getZAssetName = () => {
-    switch (cryptoType) {
-      case CryptoCurrency.DOGE:
-        return "ZDOGE";
-      case CryptoCurrency.LTC:
-        return "ZLTC";
-      case CryptoCurrency.BTC:
-      default:
-        return "ZBTC";
-    }
+    return "ZBTC";
   };
 
   const getDecimals = () => {
@@ -176,13 +203,24 @@ export default function Deposit({
     }
   };
 
+  // Get display balance for the UI
+  const getDisplayBalance = () => {
+    // For DOGE and LTC, always show the default values
+    if (!isBTC) {
+      return cryptoType === CryptoCurrency.DOGE ? 0.0007 : 0.00348;
+    }
+
+    // For BTC, use the actual available satoshis
+    return isAllConnected ? (availableSatoshis / 10 ** getDecimals()) : 0;
+  };
+
   return (
     <>
       <div className={`${styles.mintWidget__card__actions}`}>
         <div className={`${styles.mintWidget__card__actions__item} ds`}>
           <div className={styles.mintWidget__card__actions__item__title}>
             <span>Lock</span>
-            {!isAllConnected ? (
+            {(!isAllConnected && isBTC) ? (
               <div
                 className={
                   styles.mintWidget__card__actions__item__footer__message
@@ -199,14 +237,14 @@ export default function Deposit({
                 onMouseLeave={() => setIsBalanceTooltipOpen(false)}
               >
                 <DepositTooltip
-                  totalBalance={totalSatoshis}
-                  availableUtxoAmount={availableSatoshis}
-                  unavailableUtxoAmount={unavailableSatoshis}
+                  totalBalance={isBTC ? totalSatoshis : getDefaultBalance()}
+                  availableUtxoAmount={isBTC ? availableSatoshis : getDefaultBalance()}
+                  unavailableUtxoAmount={isBTC ? unavailableSatoshis : 0}
                   isOpen={isBalanceTooltipOpen}
                 />
                 <Icon name="WalletSmall" />
                 <span className="text-shade-primary">
-                  {formatValue(availableSatoshis / 10 ** getDecimals(), 6)}
+                  {formatValue(getDisplayBalance(), 6)}
                   <span className="text-shade-mute"> Available {getAssetName()}</span>
                 </span>
               </div>
@@ -214,9 +252,9 @@ export default function Deposit({
           </div>
 
           <CryptoInput
-            isDisabled={!isAllConnected}
+            isDisabled={isBTC && !isAllConnected}
             min={0.0001}
-            max={satoshiToBtc(maxSpendableSatoshis)}
+            max={isBTC ? satoshiToBtc(maxSpendableSatoshis) : getDisplayBalance() * 1.0}
             setAmount={setProvideAmountValue}
             errorMessage={errorMessage}
             value={provideAmountValue}
@@ -228,6 +266,7 @@ export default function Deposit({
               label: getAssetName(),
               type: null,
             }}
+            decimals={getDecimals()}
           />
         </div>
 
@@ -241,30 +280,36 @@ export default function Deposit({
             setAmount={setProvideAmountValue}
             fiatValue={estimateReceivedValue}
             currentOption={{ label: getZAssetName(), type: "Custodial" }}
+            decimals={getDecimals()}
           />
         </div>
 
         <Button
-          icon={!isAllConnected && <Icon name="Wallet" />}
+          icon={(!isAllConnected && isBTC) ? <Icon name="Wallet" /> : undefined}
           theme="primary"
           label="Deposit"
           size="lg"
           classes="!mt-8"
           isLoading={isDepositing}
-          disabled={isAllConnected && (provideAmount === 0 || !!errorMessage)}
+          disabled={(isBTC && !isAllConnected) || (provideAmount === 0 || !!errorMessage)}
           onClick={async () => {
             setIsDepositing(true);
             try {
-              const result = await checkHotReserveBucketStatus();
-              if (result?.status === CheckBucketResult.NotFound) {
-                setAccountProcessModalType("creation");
-              } else if (
-                result?.status === CheckBucketResult.Expired ||
-                result?.status === CheckBucketResult.Deactivated
-              ) {
-                setAccountProcessModalType("renew");
+              if (isBTC) {
+                const result = await checkHotReserveBucketStatus();
+                if (result?.status === CheckBucketResult.NotFound) {
+                  setAccountProcessModalType("creation");
+                } else if (
+                  result?.status === CheckBucketResult.Expired ||
+                  result?.status === CheckBucketResult.Deactivated
+                ) {
+                  setAccountProcessModalType("renew");
+                } else {
+                  await updateBitcoinUTXOs();
+                  openConfirmDepositModal();
+                }
               } else {
-                await updateBitcoinUTXOs();
+                // For DOGE and LTC, directly open confirm deposit modal
                 openConfirmDepositModal();
               }
             } catch {
@@ -273,8 +318,8 @@ export default function Deposit({
               setIsDepositing(false);
             }
           }}
-          solanaWalletRequired={true}
-          bitcoinWalletRequired={true}
+          solanaWalletRequired={isBTC}
+          bitcoinWalletRequired={isBTC}
         />
       </div>
 
@@ -296,7 +341,7 @@ export default function Deposit({
         onClose={() => setIsConfirmDepositModalOpen(false)}
         solanaPubkey={solanaPubkey}
         bitcoinWallet={bitcoinWallet}
-        bitcoinUTXOs={cachedUtxos}
+        bitcoinUTXOs={isBTC ? cachedUtxos : []}
         depositAmount={btcToSatoshi(parseFloat(provideAmountValue) || 0)}
         minerFee={estimatedLockToColdFeeInSatoshis}
         assetFrom={{

@@ -37,9 +37,9 @@ export default function DashboardPage() {
   const [selectedTimelineTab, setSelectedTimelineTab] = useState(
     timelineTabs.indexOf(timelineTabs[4])
   );
-  const { price: btcPrice } = usePrice("BTC");
-  const { price: dogePrice } = usePrice("DOGE");
-  const { price: ltcPrice } = usePrice("LTC");
+  const { price: btcPrice, priceChangePercent: btcPriceChange } = usePrice("BTC");
+  const { price: dogePrice, priceChangePercent: dogePriceChange } = usePrice("DOGE");
+  const { price: ltcPrice, priceChangePercent: ltcPriceChange } = usePrice("LTC");
   const { data: twoWayPegGuardianSettings } = useTwoWayPegGuardianSettings();
   const { data: statsData, isLoading: isStatsLoading } = useDashboardStats(
     twoWayPegGuardianSettings.map((item) => item.address)
@@ -86,7 +86,7 @@ export default function DashboardPage() {
       chartsData.recentDayHourlyVolumeChartData,
       24,
       "hour",
-      btcPrice.price
+      btcPrice
     )
     : defaultChartData;
 
@@ -95,7 +95,7 @@ export default function DashboardPage() {
       chartsData.recentWeekDailyVolumeChartData,
       7,
       "day",
-      btcPrice.price
+      btcPrice
     )
     : defaultChartData;
 
@@ -104,38 +104,38 @@ export default function DashboardPage() {
       chartsData.recentMonthDailyVolumeChartData,
       31,
       "day",
-      btcPrice.price
+      btcPrice
     )
     : defaultChartData;
 
   const allWeeklyVolumeChartData: ChartDataPoint[] =
     chartsData?.allWeeklyVolumeChartData.map((data) => ({
       date: new Date(data.time * 1000),
-      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice.price,
+      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice,
     })) ?? defaultChartData;
 
   const recentDayHourlyAmountChartData: ChartDataPoint[] =
     chartsData?.recentDayHourlyAmountChartData.map((data) => ({
       date: new Date(data.time * 1000),
-      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice.price,
+      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice,
     })) ?? defaultChartData;
 
   const recentWeekDailyAmountChartData: ChartDataPoint[] =
     chartsData?.recentWeekDailyAmountChartData.map((data) => ({
       date: new Date(data.time * 1000),
-      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice.price,
+      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice,
     })) ?? defaultChartData;
 
   const recentMonthDailyAmountChartData: ChartDataPoint[] =
     chartsData?.recentMonthDailyAmountChartData.map((data) => ({
       date: new Date(data.time * 1000),
-      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice.price,
+      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice,
     })) ?? defaultChartData;
 
   const allWeeklyAmountChartData: ChartDataPoint[] =
     chartsData?.allWeeklyAmountChartData.map((data) => ({
       date: new Date(data.time * 1000),
-      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice.price,
+      value: (data.value / 10 ** BTC_DECIMALS) * btcPrice,
     })) ?? defaultChartData;
 
   const tvl = recentWeekDailyAmountChartData.at(-1)?.value ?? 0;
@@ -175,10 +175,10 @@ export default function DashboardPage() {
       <DashboardCharts
         showHourlyTimestamps={selectedTimelineTab === 0}
         isLoading={isLoading}
-        btcPrice={btcPrice.price}
+        btcPrice={btcPrice}
         selectedTimeline={selectedTimelineTab}
         tvl={tvl}
-        totalVolume={statsData ? statsData.totalVolume * btcPrice.price : 0}
+        totalVolume={statsData ? statsData.totalVolume * btcPrice : 0}
         uniqueWallets={statsData?.totalUniqueWallets ?? 0}
         recentDayHourlyHotReserveBucketsChartData={
           recentDayHourlyHotReserveBucketsChartData
@@ -207,18 +207,18 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CryptoInfoCard
             cryptoType={CryptoCurrency.BTC}
-            price={btcPrice.price}
-            change24h={btcPrice.priceChangePercent}
+            price={btcPrice}
+            change24h={btcPriceChange}
           />
           <CryptoInfoCard
             cryptoType={CryptoCurrency.DOGE}
-            price={dogePrice.price}
-            change24h={dogePrice.priceChangePercent}
+            price={dogePrice}
+            change24h={dogePriceChange}
           />
           <CryptoInfoCard
             cryptoType={CryptoCurrency.LTC}
-            price={ltcPrice.price}
-            change24h={ltcPrice.priceChangePercent}
+            price={ltcPrice}
+            change24h={ltcPriceChange}
           />
         </div>
       </div>

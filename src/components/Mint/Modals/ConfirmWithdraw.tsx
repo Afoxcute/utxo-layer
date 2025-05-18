@@ -334,7 +334,7 @@ export default function ConfirmWithdraw({
                   width={250}
                   arrowPosition="left-middle"
                 >
-                  The Service Fee is deducted from the final received BTC amount
+                  The Service Fee is deducted from the final received {cryptoType} amount
                   by Orpheus.
                 </Tooltip>
               </div>
@@ -342,7 +342,7 @@ export default function ConfirmWithdraw({
             </div>
             <div className="flex items-center justify-between">
               <span>Miner Fee</span>
-              <span>{minerFee} BTC</span>
+              <span>{minerFee} {cryptoType}</span>
             </div>
             <div className="flex items-center justify-between">
               <span>Layer Fee</span>
@@ -424,69 +424,66 @@ const WithdrawAssetBanner = ({
   };
   cryptoType?: CryptoCurrency;
 }) => {
+  // Get the correct icon name based on crypto type
+  const getToIconName = (): string => {
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return "doge";
+      case CryptoCurrency.LTC:
+        return "ltc";
+      case CryptoCurrency.BTC:
+      default:
+        return "btc";
+    }
+  };
+
   return (
-    <div className={styles.confirmWithdraw__banner}>
-      <div className={styles.confirmWithdraw__banner__item}>
-        <div className={styles.confirmWithdraw__banner__item__icon}>
-          <Icon name={getZIconName(cryptoType)} />
-        </div>
-        <div className={styles.confirmWithdraw__banner__item__info}>
-          <span className={styles.confirmWithdraw__banner__item__info__amount}>
+    <div
+      className={classNames(
+        "gradient-border rounded-12 flex w-full flex-col gap-x-24 gap-y-16 bg-[linear-gradient(91deg,rgba(253,131,255,0.08)_0%,rgba(178,131,255,0.08)_30%,rgba(225,234,253,0.05)_40%,rgba(225,234,253,0.00)_55%,rgba(255,103,70,0.05)_70%,rgba(255,103,70,0.08)_100%)] sm:flex-row sm:items-center sm:justify-between sm:gap-y-0 sm:px-40 sm:py-16"
+      )}
+    >
+      <div className="flex w-full flex-row justify-between gap-y-8 sm:w-auto sm:flex-col sm:justify-start">
+        <span className="body-body2-medium text-sys-color-text-primary">
+          Burn
+        </span>
+        <div className="flex items-center gap-x-8">
+          <Icon name="zbtc" size={18} />
+          <span className="body-body1-medium sm:headline-headline5 text-sys-color-text-primary">
             {assetFrom.amount}
-          </span>
-          <span className={styles.confirmWithdraw__banner__item__info__name}>
-            {getZAssetName(cryptoType)}
+            <span className="text-sys-color-text-primary body-body1-medium sm:headline-headline6">
+              {""} {assetFrom.name}
+            </span>
           </span>
           {assetFrom.isLocked && (
-            <div
-              className={styles.confirmWithdraw__banner__item__info__lock__icon}
-            >
-              <Icon name="Lock" />
-            </div>
+            <Icon name="Lock" className="text-sys-color-text-primary" />
           )}
         </div>
       </div>
-      <div className={styles.confirmWithdraw__banner__arrow}>
-        <Icon name="ChevronRight" />
-      </div>
-      <div className={styles.confirmWithdraw__banner__item}>
-        <div className={styles.confirmWithdraw__banner__item__icon}>
-          <Icon name={assetTo.name.toLowerCase() as IconName} />
-        </div>
-        <div className={styles.confirmWithdraw__banner__item__info}>
-          <span className={styles.confirmWithdraw__banner__item__info__amount}>
+
+      <Icon
+        name="DoubleRight"
+        className="text-sys-color-text-primary hidden flex-shrink-0 sm:block"
+        size={24 as 18 | 14 | 12}
+      />
+
+      <div className="flex w-full flex-row items-center justify-between gap-y-8 sm:w-auto sm:flex-col sm:items-start sm:justify-start">
+        <span className="body-body2-medium text-sys-color-text-primary">
+          Unlock
+        </span>
+        <div className="flex items-center gap-x-8">
+          <Icon name={getToIconName()} size={18} />
+          <span className="body-body1-medium sm:headline-headline5 text-sys-color-text-primary">
             {assetTo.amount}
-          </span>
-          <span className={styles.confirmWithdraw__banner__item__info__name}>
-            {assetTo.name}
+            <span className="text-sys-color-text-primary body-body1-medium sm:headline-headline6">
+              {""} {assetTo.name}
+            </span>
           </span>
           {assetTo.isLocked && (
-            <div
-              className={styles.confirmWithdraw__banner__item__info__lock__icon}
-            >
-              <Icon name="Lock" />
-            </div>
+            <Icon name="Lock" className="text-sys-color-text-primary" />
           )}
         </div>
       </div>
     </div>
   );
-};
-
-// Helper functions to get asset names based on crypto type
-const getZAssetName = (cryptoType: CryptoCurrency) => {
-  switch (cryptoType) {
-    case CryptoCurrency.DOGE:
-      return "ZDOGE";
-    case CryptoCurrency.LTC:
-      return "ZLTC";
-    case CryptoCurrency.BTC:
-    default:
-      return "ZBTC";
-  }
-};
-
-const getZIconName = (cryptoType: CryptoCurrency): IconName => {
-  // Using zbtc icon for all tokens since specific icons may not exist
-  return "zbtc";
 };

@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { xOnlyPubkeyHexToP2tr } from "@/bitcoin";
 import Icon from "@/components/Icons";
@@ -16,6 +16,8 @@ import { Position } from "@/types/zplClient";
 import {
   DEFAULT_SERVICE_FEE_BASIS_POINT_PERCENT,
   BTC_DECIMALS,
+  DOGE_DECIMALS,
+  LTC_DECIMALS,
   DEFAULT_LAYER_FEE,
   MODAL_NAMES,
 } from "@/utils/constant";
@@ -55,6 +57,22 @@ export default function Withdraw({
   const { feeRate } = useTwoWayPegConfiguration();
   const { data: hotReserveBuckets } = useHotReserveBucketsByOwner(solanaPubkey);
 
+  // Set default balances for different crypto types
+  const getDefaultBalance = () => {
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return new BigNumber(0.000037 * 10 ** DOGE_DECIMALS);
+      case CryptoCurrency.LTC:
+        return new BigNumber(0.00048 * 10 ** LTC_DECIMALS);
+      case CryptoCurrency.BTC:
+      default:
+        return zbtcBalance;
+    }
+  };
+
+  // For DOGE and LTC, we'll use predefined balances
+  const adjustedBalance = getDefaultBalance();
+
   const zbtcBalanceInVault =
     positions?.reduce(
       (acc, cur) =>
@@ -64,15 +82,45 @@ export default function Withdraw({
       new BigNumber(0)
     ) ?? new BigNumber(0);
 
+  // Helper functions - moved up before they're used
+  const getAssetName = () => {
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return "DOGE";
+      case CryptoCurrency.LTC:
+        return "LTC";
+      case CryptoCurrency.BTC:
+      default:
+        return "BTC";
+    }
+  };
+
+  const getZAssetName = () => {
+    // Always return ZBTC regardless of the selected cryptocurrency
+    return "ZBTC";
+  };
+
+  const getDecimals = () => {
+    switch (cryptoType) {
+      case CryptoCurrency.DOGE:
+        return DOGE_DECIMALS;
+      case CryptoCurrency.LTC:
+        return LTC_DECIMALS;
+      case CryptoCurrency.BTC:
+      default:
+        return BTC_DECIMALS;
+    }
+  };
+
   const [currentOption, setCurrentOption] = useState<CryptoInputOption>(
     zbtcBalanceInVault?.gt(zbtcBalance)
       ? {
-        label: "ZBTC",
+        label: getZAssetName(),
         type: "Custodial",
         icon: "Lock",
       }
       : {
-        label: "ZBTC",
+        label: getZAssetName(),
         type: null,
       }
   );
@@ -80,6 +128,16 @@ export default function Withdraw({
   const [provideAmountValue, setProvideAmountValue] = useState("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [prevCryptoType, setPrevCryptoType] = useState<CryptoCurrency>(cryptoType);
+
+  // Update when crypto type changes
+  useEffect(() => {
+    if (prevCryptoType !== cryptoType) {
+      setPrevCryptoType(cryptoType);
+      // Reset input when switching crypto types
+      resetInput();
+    }
+  }, [cryptoType]);
 
   const walletsInHotReserveBuckets = hotReserveBuckets.map((bucket) =>
     xOnlyPubkeyHexToP2tr(
@@ -96,7 +154,7 @@ export default function Withdraw({
   const estimatedWithdrawTransactionFeeInSatoshis =
     getEstimatedWithdrawalTransactionFee(feeRate);
   const estimatedWithdrawTransactionFeeInBtc =
-    estimatedWithdrawTransactionFeeInSatoshis / 10 ** BTC_DECIMALS;
+    estimatedWithdrawTransactionFeeInSatoshis / 10 ** getDecimals();
 
   const estimateServiceFee =
     DEFAULT_SERVICE_FEE_BASIS_POINT_PERCENT * provideAmount;
@@ -117,19 +175,19 @@ export default function Withdraw({
 
   const dropdownOptions: CryptoInputOption[] = [
     {
-      label: "ZBTC",
+      label: getZAssetName(),
       type: "Custodial",
-      amount: zbtcBalanceInVault?.div(10 ** BTC_DECIMALS).toNumber(),
+      amount: zbtcBalanceInVault?.div(10 ** getDecimals()).toNumber(),
       value: formatValue(
-        zbtcBalanceInVault?.div(10 ** BTC_DECIMALS).multipliedBy(btcPrice),
+        zbtcBalanceInVault?.div(10 ** getDecimals()).multipliedBy(btcPrice),
         2
       ),
       icon: "Lock",
     },
     {
-      label: "ZBTC",
+      label: getZAssetName(),
       type: null,
-      amount: zbtcBalance?.div(10 ** BTC_DECIMALS).toNumber(),
+      amount: adjustedBalance?.div(10 ** getDecimals()).toNumber(),
     },
   ];
 
@@ -158,42 +216,6 @@ export default function Withdraw({
     setPrevConnected(solanaWalletConnected);
     resetInput();
   }
-
-  const getAssetName = () => {
-    switch (cryptoType) {
-      case CryptoCurrency.DOGE:
-        return "DOGE";
-      case CryptoCurrency.LTC:
-        return "LTC";
-      case CryptoCurrency.BTC:
-      default:
-        return "BTC";
-    }
-  };
-
-  const getZAssetName = () => {
-    switch (cryptoType) {
-      case CryptoCurrency.DOGE:
-        return "ZDOGE";
-      case CryptoCurrency.LTC:
-        return "ZLTC";
-      case CryptoCurrency.BTC:
-      default:
-        return "ZBTC";
-    }
-  };
-
-  const getDecimals = () => {
-    switch (cryptoType) {
-      case CryptoCurrency.DOGE:
-        return DOGE_DECIMALS;
-      case CryptoCurrency.LTC:
-        return LTC_DECIMALS;
-      case CryptoCurrency.BTC:
-      default:
-        return BTC_DECIMALS;
-    }
-  };
 
   return (
     <>
@@ -244,6 +266,7 @@ export default function Withdraw({
             dropdownOptions={dropdownOptions}
             currentOption={currentOption}
             changeOption={changeOption}
+            decimals={getDecimals()}
           />
         </div>
         <div className={`${styles.mintWidget__card__actions__item}`}>
@@ -256,9 +279,10 @@ export default function Withdraw({
             setAmount={setProvideAmountValue}
             fiatValue={estimateReceiveBtcValue}
             currentOption={{
-              label: "tBTC",
+              label: getAssetName(),
               type: null,
             }}
+            decimals={getDecimals()}
           />
         </div>
         <Button

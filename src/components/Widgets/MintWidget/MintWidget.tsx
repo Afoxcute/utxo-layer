@@ -38,6 +38,8 @@ export default function MintWidget() {
   const searchParams = useSearchParams();
   const widgetRef = useRef<HTMLDivElement>(null);
   const { price: btcPrice } = usePrice("BTCUSDC");
+  const { price: dogePrice } = usePrice("DOGEUSDC");
+  const { price: ltcPrice } = usePrice("LTCUSDC");
   const { publicKey: solanaPubkey } = useWallet();
   const {
     wallet: bitcoinWallet,
@@ -81,6 +83,19 @@ export default function MintWidget() {
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoCurrency>(CryptoCurrency.BTC);
 
   const isAllConnected = solanaWalletConnected && bitcoinWalletConnected;
+
+  // Get the appropriate price based on the selected crypto type
+  const getCryptoPrice = () => {
+    switch (selectedCrypto) {
+      case CryptoCurrency.DOGE:
+        return dogePrice?.price ?? 0;
+      case CryptoCurrency.LTC:
+        return ltcPrice?.price ?? 0;
+      case CryptoCurrency.BTC:
+      default:
+        return btcPrice?.price ?? 0;
+    }
+  };
 
   const handleTabClick = (tabValue: string) => {
     setActiveTab(tabValue);
@@ -132,7 +147,7 @@ export default function MintWidget() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              key={activeTab}
+              key={activeTab + selectedCrypto}
               className={`${styles.mintWidget__card__content} relative`}
             >
               {activeTab === "deposit" && (
@@ -144,7 +159,7 @@ export default function MintWidget() {
                   updateDepositTransactions={async () => {
                     await mutateDepositTransactions();
                   }}
-                  btcPrice={btcPrice?.price ?? 0}
+                  btcPrice={getCryptoPrice()}
                   cachedUtxos={cachedUtxos}
                   cryptoType={selectedCrypto}
                 />
@@ -156,7 +171,7 @@ export default function MintWidget() {
                     solanaPubkey={solanaPubkey}
                     solanaWalletConnected={solanaWalletConnected}
                     positions={positions}
-                    btcPrice={btcPrice?.price ?? 0}
+                    btcPrice={getCryptoPrice()}
                     zbtcBalance={zbtcBalance}
                     updateTransactions={async () => {
                       await mutateWithdrawalTransactions();
